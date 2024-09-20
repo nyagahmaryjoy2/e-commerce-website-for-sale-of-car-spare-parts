@@ -32,6 +32,7 @@
          <a href="https://twitter.com/maryjoynjeri" target="_blank"><i class="fab fa-twitter"></i>Twitter</a>
          <a href="https://www.instagram.com/_classic.mj_/" target="_blank"><i class="fab fa-instagram"></i>Instagram</a>
          <a href="https://www.linkedin.com/in/maryjoy-nyagah-3b4685305?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank"><i class="fab fa-linkedin"></i>Linkedin</a>
+         <a href="https://github.com/nyagahmaryjoy2"target="_blank" ><i class="fab fa-github"></i>Git Hub</a>
       </div>
 
    </section>
