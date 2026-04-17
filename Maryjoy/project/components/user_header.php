@@ -50,7 +50,7 @@
             $fetch_profile = $select_profile->fetch(PDO::FETCH_ASSOC);
          ?>
          <p><?= $fetch_profile["name"]; ?></p>
-         <a href="update_user.php" class="btn">Update Profile.</a>
+         <a href="view_profile.php" class="btn">View Profile</a>
          <div class="flex-btn">
             <a href="user_register.php" class="option-btn">Register.</a>
             <a href="user_login.php" class="option-btn">Login.</a>

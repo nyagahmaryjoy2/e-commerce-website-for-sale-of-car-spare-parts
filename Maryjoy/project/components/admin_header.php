@@ -20,6 +20,7 @@
          <a href="../admin/dashboard.php">Home</a>
          <a href="../admin/products.php">Products</a>
          <a href="../admin/placed_orders.php">Orders</a>
+         <a href="../admin/mpesa_settings.php">M-Pesa Settings</a>
          <a href="../admin/admin_accounts.php">Admins</a>
          <a href="../admin/users_accounts.php">Users</a>
          <a href="../admin/messages.php">Messages</a>

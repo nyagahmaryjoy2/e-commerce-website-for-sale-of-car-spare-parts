@@ -63,6 +63,7 @@ if(isset($_GET['delete'])){
       <p> Number : <span><?= $fetch_orders['number']; ?></span> </p>
       <p> Address : <span><?= $fetch_orders['address']; ?></span> </p>
       <p> Total products : <span><?= $fetch_orders['total_products']; ?></span> </p>
+      <p> Total items : <span><?= $fetch_orders['total_items']; ?></span> </p>
       <p> Total price : <span>KSH.<?= $fetch_orders['total_price']; ?>/-</span> </p>
       <p> Payment method : <span><?= $fetch_orders['method']; ?></span> </p>
       <form action="" method="post">
