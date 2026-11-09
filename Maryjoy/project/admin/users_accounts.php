@@ -1,28 +1,45 @@
 <?php
 
 include '../components/connect.php';
+require_once '../components/admin_access.php';
 
-session_start();
+if(session_status() === PHP_SESSION_NONE){ session_start(); }
 
-$admin_id = $_SESSION['admin_id'];
+$admin_id = (int)($_SESSION['admin_id'] ?? 0);
 
-if(!isset($admin_id)){
+if($admin_id === 0){
    header('location:admin_login.php');
+   exit;
 }
 
+ensure_admin_access_schema($conn);
+$admin_access = get_admin_access($conn, $admin_id);
+$can_view_user_data = admin_can_view_user_data($admin_access);
+
 if(isset($_GET['delete'])){
-   $delete_id = $_GET['delete'];
-   $delete_user = $conn->prepare("DELETE FROM `users` WHERE id = ?");
-   $delete_user->execute([$delete_id]);
-   $delete_orders = $conn->prepare("DELETE FROM `orders` WHERE user_id = ?");
-   $delete_orders->execute([$delete_id]);
-   $delete_messages = $conn->prepare("DELETE FROM `messages` WHERE user_id = ?");
-   $delete_messages->execute([$delete_id]);
-   $delete_cart = $conn->prepare("DELETE FROM `cart` WHERE user_id = ?");
-   $delete_cart->execute([$delete_id]);
-   $delete_wishlist = $conn->prepare("DELETE FROM `wishlist` WHERE user_id = ?");
-   $delete_wishlist->execute([$delete_id]);
+   if(empty($admin_access['is_super_admin'])){
+      http_response_code(403);
+      exit('Super admin access required to delete user accounts.');
+   }
+   $delete_id = filter_var($_GET['delete'], FILTER_VALIDATE_INT);
+   if(!$delete_id){
+      header('location:users_accounts.php');
+      exit;
+   }
+   $delete_user = $conn->prepare("DELETE FROM `users` WHERE `id` = ?");
+   $delete_user->execute([(int)$delete_id]);
+   $delete_orders = $conn->prepare("DELETE FROM `orders` WHERE `user_id` = ?");
+   $delete_orders->execute([(int)$delete_id]);
+   $delete_messages = $conn->prepare("DELETE FROM `messages` WHERE `user_id` = ?");
+   $delete_messages->execute([(int)$delete_id]);
+   $delete_cart = $conn->prepare("DELETE FROM `cart` WHERE `user_id` = ?");
+   $delete_cart->execute([(int)$delete_id]);
+   $delete_wishlist = $conn->prepare("DELETE FROM `wishlist` WHERE `user_id` = ?");
+   $delete_wishlist->execute([(int)$delete_id]);
+   $delete_documents = $conn->prepare("DELETE FROM `user_documents` WHERE `user_id` = ?");
+   $delete_documents->execute([(int)$delete_id]);
    header('location:users_accounts.php');
+   exit;
 }
 
 ?>
@@ -58,13 +75,11 @@ if(isset($_GET['delete'])){
    ?>
    <div class="box">
       <p> User id : <span><?= $fetch_accounts['id']; ?></span> </p>
-      <p> First Name : <span><?= $fetch_accounts['first_name']; ?></span> </p>
-      <p> Last Name : <span><?= $fetch_accounts['last_name']; ?></span> </p>
-      <p> Username : <span><?= $fetch_accounts['name']; ?></span> </p>
-      <p> Email : <span><?= $fetch_accounts['email']; ?></span> </p>
-      <p> Phone : <span><?= $fetch_accounts['phone']; ?></span> </p>
-      <p> Address : <span><?= $fetch_accounts['address']; ?></span> </p>
-      <a href="users_accounts.php?delete=<?= $fetch_accounts['id']; ?>" onclick="return confirm('delete this account? the user related information will also be delete!')" class="delete-btn">delete</a>
+      <p> Username : <span><?= htmlspecialchars($can_view_user_data ? $fetch_accounts['name'] : mask_customer_name($fetch_accounts['name']), ENT_QUOTES, 'UTF-8'); ?></span> </p>
+      <p> Email : <span><?= htmlspecialchars($can_view_user_data ? $fetch_accounts['email'] : mask_customer_email($fetch_accounts['email']), ENT_QUOTES, 'UTF-8'); ?></span> </p>
+      <?php if(!empty($admin_access['is_super_admin'])){ ?>
+         <a href="users_accounts.php?delete=<?= (int)$fetch_accounts['id']; ?>" onclick="return confirm('delete this account? the user related information will also be deleted!')" class="delete-btn">delete</a>
+      <?php } ?>
    </div>
    <?php
          }

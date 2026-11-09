@@ -6,14 +6,12 @@ if(isset($_POST['add_to_wishlist'])){
       header('location:user_login.php');
    }else{
 
-      $pid = $_POST['pid'];
-      $pid = filter_var($pid, FILTER_SANITIZE_STRING);
-      $name = $_POST['name'];
-      $name = filter_var($name, FILTER_SANITIZE_STRING);
-      $price = $_POST['price'];
-      $price = filter_var($price, FILTER_SANITIZE_STRING);
-      $image = $_POST['image'];
-      $image = filter_var($image, FILTER_SANITIZE_STRING);
+      $pid = (int)($_POST['pid'] ?? 0);
+      $name = trim($_POST['name'] ?? '');
+      $name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+      $price = (float)($_POST['price'] ?? 0);
+      $image = trim($_POST['image'] ?? '');
+      $image = htmlspecialchars($image, ENT_QUOTES, 'UTF-8');
 
       $check_wishlist_numbers = $conn->prepare("SELECT * FROM `wishlist` WHERE name = ? AND user_id = ?");
       $check_wishlist_numbers->execute([$name, $user_id]);
@@ -41,16 +39,13 @@ if(isset($_POST['add_to_cart'])){
       header('location:user_login.php');
    }else{
 
-      $pid = $_POST['pid'];
-      $pid = filter_var($pid, FILTER_SANITIZE_STRING);
-      $name = $_POST['name'];
-      $name = filter_var($name, FILTER_SANITIZE_STRING);
-      $price = $_POST['price'];
-      $price = filter_var($price, FILTER_SANITIZE_STRING);
-      $image = $_POST['image'];
-      $image = filter_var($image, FILTER_SANITIZE_STRING);
-      $qty = $_POST['qty'];
-      $qty = filter_var($qty, FILTER_SANITIZE_STRING);
+      $pid = (int)($_POST['pid'] ?? 0);
+      $name = trim($_POST['name'] ?? '');
+      $name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+      $price = (float)($_POST['price'] ?? 0);
+      $image = trim($_POST['image'] ?? '');
+      $image = htmlspecialchars($image, ENT_QUOTES, 'UTF-8');
+      $qty = max(1, (int)($_POST['qty'] ?? 1));
 
       $check_cart_numbers = $conn->prepare("SELECT * FROM `cart` WHERE name = ? AND user_id = ?");
       $check_cart_numbers->execute([$name, $user_id]);

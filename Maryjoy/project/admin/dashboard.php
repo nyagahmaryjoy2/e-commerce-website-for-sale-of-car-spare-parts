@@ -2,12 +2,13 @@
 
 include '../components/connect.php';
 
-session_start();
+if(session_status() === PHP_SESSION_NONE){ session_start(); }
 
-$admin_id = $_SESSION['admin_id'];
+$admin_id = (int)($_SESSION['admin_id'] ?? 0);
 
-if(!isset($admin_id)){
+if($admin_id === 0){
    header('location:admin_login.php');
+   exit;
 }
 
 ?>
@@ -77,7 +78,7 @@ if(!isset($admin_id)){
          <?php
             $select_orders = $conn->prepare("SELECT * FROM `orders`");
             $select_orders->execute();
-            $number_of_orders = $select_orders->rowCount()
+            $number_of_orders = $select_orders->rowCount();
          ?>
          <h3><?= $number_of_orders; ?></h3>
          <p>Orders Placed.</p>
@@ -88,7 +89,7 @@ if(!isset($admin_id)){
          <?php
             $select_products = $conn->prepare("SELECT * FROM `products`");
             $select_products->execute();
-            $number_of_products = $select_products->rowCount()
+            $number_of_products = $select_products->rowCount();
          ?>
          <h3><?= $number_of_products; ?></h3>
          <p>Products added</p>
@@ -99,7 +100,7 @@ if(!isset($admin_id)){
          <?php
             $select_users = $conn->prepare("SELECT * FROM `users`");
             $select_users->execute();
-            $number_of_users = $select_users->rowCount()
+            $number_of_users = $select_users->rowCount();
          ?>
          <h3><?= $number_of_users; ?></h3>
          <p>Normal users</p>
@@ -110,7 +111,7 @@ if(!isset($admin_id)){
          <?php
             $select_admins = $conn->prepare("SELECT * FROM `admins`");
             $select_admins->execute();
-            $number_of_admins = $select_admins->rowCount()
+            $number_of_admins = $select_admins->rowCount();
          ?>
          <h3><?= $number_of_admins; ?></h3>
          <p>Admin users</p>
@@ -121,7 +122,7 @@ if(!isset($admin_id)){
          <?php
             $select_messages = $conn->prepare("SELECT * FROM `messages`");
             $select_messages->execute();
-            $number_of_messages = $select_messages->rowCount()
+            $number_of_messages = $select_messages->rowCount();
          ?>
          <h3><?= $number_of_messages; ?></h3>
          <p>New messages</p>

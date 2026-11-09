@@ -1,20 +1,31 @@
 <?php
 
 include '../components/connect.php';
+require_once '../components/admin_access.php';
 
-session_start();
+if(session_status() === PHP_SESSION_NONE){ session_start(); }
 
-$admin_id = $_SESSION['admin_id'];
+$admin_id = (int)($_SESSION['admin_id'] ?? 0);
 
-if(!isset($admin_id)){
+if($admin_id === 0){
    header('location:admin_login.php');
-};
+   exit;
+}
+
+ensure_admin_access_schema($conn);
+$admin_access = get_admin_access($conn, $admin_id);
+$can_view_user_data = admin_can_view_user_data($admin_access);
 
 if(isset($_GET['delete'])){
+   if(empty($admin_access['is_super_admin'])){
+      http_response_code(403);
+      exit('Super admin access required to delete messages.');
+   }
    $delete_id = $_GET['delete'];
    $delete_message = $conn->prepare("DELETE FROM `messages` WHERE id = ?");
    $delete_message->execute([$delete_id]);
    header('location:messages.php');
+   exit;
 }
 
 ?>
@@ -50,11 +61,13 @@ if(isset($_GET['delete'])){
    ?>
    <div class="box">
    <p> User id : <span><?= $fetch_message['user_id']; ?></span></p>
-   <p> Name : <span><?= $fetch_message['name']; ?></span></p>
-   <p> Email : <span><?= $fetch_message['email']; ?></span></p>
-   <p> Number : <span><?= $fetch_message['number']; ?></span></p>
-   <p> Message : <span><?= $fetch_message['message']; ?></span></p>
-   <a href="messages.php??delete=<?= $fetch_message['id']; ?>" onclick="return confirm('delete this message?');" class="delete-btn">Delete</a>
+   <p> Name : <span><?= htmlspecialchars($can_view_user_data ? $fetch_message['name'] : mask_customer_name($fetch_message['name']), ENT_QUOTES, 'UTF-8'); ?></span></p>
+   <p> Email : <span><?= htmlspecialchars($can_view_user_data ? $fetch_message['email'] : mask_customer_email($fetch_message['email']), ENT_QUOTES, 'UTF-8'); ?></span></p>
+   <p> Number : <span><?= htmlspecialchars($can_view_user_data ? $fetch_message['number'] : mask_customer_phone($fetch_message['number']), ENT_QUOTES, 'UTF-8'); ?></span></p>
+   <p> Message : <span><?= $can_view_user_data ? htmlspecialchars($fetch_message['message'], ENT_QUOTES, 'UTF-8') : 'Hidden - User Data permission required'; ?></span></p>
+   <?php if(!empty($admin_access['is_super_admin'])){ ?>
+      <a href="messages.php?delete=<?= (int)$fetch_message['id']; ?>" onclick="return confirm('delete this message?');" class="delete-btn">Delete</a>
+   <?php } ?>
    </div>
    <?php
          }

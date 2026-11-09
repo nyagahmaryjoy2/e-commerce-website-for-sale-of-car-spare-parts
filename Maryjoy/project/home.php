@@ -2,7 +2,7 @@
 
 include 'components/connect.php';
 
-session_start();
+if(session_status() === PHP_SESSION_NONE){ session_start(); }
 
 if(isset($_SESSION['user_id'])){
    $user_id = $_SESSION['user_id'];
@@ -79,7 +79,9 @@ include 'components/wishlist_cart.php';
 
    </div>
 
-      <div class="swiper-pagination"></div>
+   <div class="swiper-button-prev"><i class="fas fa-chevron-left"></i></div>
+   <div class="swiper-button-next"><i class="fas fa-chevron-right"></i></div>
+   <div class="swiper-pagination"></div>
 
    </div>
 
@@ -198,6 +200,10 @@ var swiper = new Swiper(".home-slider", {
       el: ".swiper-pagination",
       clickable:true,
     },
+   navigation: {
+      nextEl: ".swiper-button-next",
+      prevEl: ".swiper-button-prev",
+   },
 });
 
  var swiper = new Swiper(".category-slider", {

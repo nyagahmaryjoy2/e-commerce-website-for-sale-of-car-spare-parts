@@ -2,7 +2,7 @@
 
 include 'components/connect.php';
 
-session_start();
+if(session_status() === PHP_SESSION_NONE){ session_start(); }
 
 if(isset($_SESSION['user_id'])){
    $user_id = $_SESSION['user_id'];
@@ -10,20 +10,28 @@ if(isset($_SESSION['user_id'])){
    $user_id = '';
 };
 
+if(isset($_GET['timeout']) || ($_SESSION['session_expired_for'] ?? '') === 'user'){
+   $message[] = 'Your session expired after 5 minutes of inactivity. Please log in again.';
+   unset($_SESSION['session_expired_for']);
+}
+
 if(isset($_POST['submit'])){
 
-   $email = $_POST['email'];
-   $email = filter_var($email, FILTER_SANITIZE_STRING);
+   $email = trim($_POST['email']);
+   $email = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
    $pass = sha1($_POST['pass']);
-   $pass = filter_var($pass, FILTER_SANITIZE_STRING);
+   $pass = htmlspecialchars($pass, ENT_QUOTES, 'UTF-8');
 
    $select_user = $conn->prepare("SELECT * FROM `users` WHERE email = ? AND password = ?");
    $select_user->execute([$email, $pass]);
    $row = $select_user->fetch(PDO::FETCH_ASSOC);
 
    if($select_user->rowCount() > 0){
+      session_regenerate_id(true);
       $_SESSION['user_id'] = $row['id'];
+      $_SESSION['last_activity'] = time();
       header('location:home.php');
+      exit;
    }else{
       $message[] = 'incorrect username or password!';
    }

@@ -2,7 +2,7 @@
 
 include 'components/connect.php';
 
-session_start();
+if(session_status() === PHP_SESSION_NONE){ session_start(); }
 
 if(isset($_SESSION['user_id'])){
    $user_id = $_SESSION['user_id'];
@@ -12,14 +12,12 @@ if(isset($_SESSION['user_id'])){
 
 if(isset($_POST['submit'])){
 
-   $name = $_POST['name'];
-   $name = filter_var($name, FILTER_SANITIZE_STRING);
-   $email = $_POST['email'];
-   $email = filter_var($email, FILTER_SANITIZE_STRING);
+   $name = trim($_POST['name']);
+   $name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+   $email = trim($_POST['email']);
+   $email = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
    $pass = sha1($_POST['pass']);
-   $pass = filter_var($pass, FILTER_SANITIZE_STRING);
    $cpass = sha1($_POST['cpass']);
-   $cpass = filter_var($cpass, FILTER_SANITIZE_STRING);
 
    $select_user = $conn->prepare("SELECT * FROM `users` WHERE email = ?");
    $select_user->execute([$email,]);
@@ -33,7 +31,12 @@ if(isset($_POST['submit'])){
       }else{
          $insert_user = $conn->prepare("INSERT INTO `users`(name, email, password) VALUES(?,?,?)");
          $insert_user->execute([$name, $email, $cpass]);
-         $message[] = 'registered successfully, login now please!';
+         session_regenerate_id(true);
+         $_SESSION['user_id'] = $conn->lastInsertId();
+         $_SESSION['last_activity'] = time();
+         $message[] = 'registered successfully!';
+         header('location:home.php');
+         exit;
       }
    }
 

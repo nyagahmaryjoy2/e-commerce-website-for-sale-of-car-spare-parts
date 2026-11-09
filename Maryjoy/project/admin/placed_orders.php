@@ -1,29 +1,40 @@
 <?php
 
 include '../components/connect.php';
+require_once '../components/admin_access.php';
 
-session_start();
+if(session_status() === PHP_SESSION_NONE){ session_start(); }
 
-$admin_id = $_SESSION['admin_id'];
+$admin_id = (int)($_SESSION['admin_id'] ?? 0);
 
-if(!isset($admin_id)){
+if($admin_id === 0){
    header('location:admin_login.php');
+   exit;
 }
+
+ensure_admin_access_schema($conn);
+$admin_access = get_admin_access($conn, $admin_id);
+$can_view_user_data = admin_can_view_user_data($admin_access);
 
 if(isset($_POST['update_payment'])){
    $order_id = $_POST['order_id'];
-   $payment_status = $_POST['payment_status'];
-   $payment_status = filter_var($payment_status, FILTER_SANITIZE_STRING);
+   $payment_status = trim($_POST['payment_status']);
+   $payment_status = htmlspecialchars($payment_status, ENT_QUOTES, 'UTF-8');
    $update_payment = $conn->prepare("UPDATE `orders` SET payment_status = ? WHERE id = ?");
    $update_payment->execute([$payment_status, $order_id]);
    $message[] = 'payment status updated!';
 }
 
 if(isset($_GET['delete'])){
+   if(empty($admin_access['is_super_admin'])){
+      http_response_code(403);
+      exit('Super admin access required to delete orders.');
+   }
    $delete_id = $_GET['delete'];
    $delete_order = $conn->prepare("DELETE FROM `orders` WHERE id = ?");
    $delete_order->execute([$delete_id]);
    header('location:placed_orders.php');
+   exit;
 }
 
 ?>
@@ -59,13 +70,13 @@ if(isset($_GET['delete'])){
    ?>
    <div class="box">
       <p> Placed On : <span><?= $fetch_orders['placed_on']; ?></span> </p>
-      <p> Name : <span><?= $fetch_orders['name']; ?></span> </p>
-      <p> Number : <span><?= $fetch_orders['number']; ?></span> </p>
-      <p> Address : <span><?= $fetch_orders['address']; ?></span> </p>
-      <p> Total products : <span><?= $fetch_orders['total_products']; ?></span> </p>
-      <p> Total items : <span><?= $fetch_orders['total_items']; ?></span> </p>
-      <p> Total price : <span>KSH.<?= $fetch_orders['total_price']; ?>/-</span> </p>
-      <p> Payment method : <span><?= $fetch_orders['method']; ?></span> </p>
+      <p> Name : <span><?= htmlspecialchars($can_view_user_data ? $fetch_orders['name'] : mask_customer_name($fetch_orders['name']), ENT_QUOTES, 'UTF-8'); ?></span> </p>
+      <p> Number : <span><?= htmlspecialchars($can_view_user_data ? $fetch_orders['number'] : mask_customer_phone($fetch_orders['number']), ENT_QUOTES, 'UTF-8'); ?></span> </p>
+      <p> Address : <span><?= $can_view_user_data ? htmlspecialchars($fetch_orders['address'], ENT_QUOTES, 'UTF-8') : 'Hidden - User Data permission required'; ?></span> </p>
+      <p> Total products : <span><?= $can_view_user_data ? htmlspecialchars($fetch_orders['total_products'], ENT_QUOTES, 'UTF-8') : 'Hidden'; ?></span> </p>
+      <p> Total items : <span><?= $can_view_user_data ? (int)$fetch_orders['total_items'] : 'Hidden'; ?></span> </p>
+      <p> Total price : <span><?= $can_view_user_data ? 'KSH.' . (int)$fetch_orders['total_price'] . '/-' : 'Hidden'; ?></span> </p>
+      <p> Payment method : <span><?= $can_view_user_data ? htmlspecialchars($fetch_orders['method'], ENT_QUOTES, 'UTF-8') : 'Hidden'; ?></span> </p>
       <form action="" method="post">
          <input type="hidden" name="order_id" value="<?= $fetch_orders['id']; ?>">
          <select name="payment_status" class="select">
@@ -75,7 +86,9 @@ if(isset($_GET['delete'])){
          </select>
         <div class="flex-btn">
          <input type="submit" value="update" class="option-btn" name="update_payment">
-         <a href="placed_orders.php?delete=<?= $fetch_orders['id']; ?>" class="delete-btn" onclick="return confirm('delete this order?');">delete</a>
+            <?php if(!empty($admin_access['is_super_admin'])){ ?>
+               <a href="placed_orders.php?delete=<?= (int)$fetch_orders['id']; ?>" class="delete-btn" onclick="return confirm('delete this order?');">delete</a>
+            <?php } ?>
         </div>
       </form>
    </div>

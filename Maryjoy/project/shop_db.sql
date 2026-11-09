@@ -24,21 +24,41 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `mpesa_settings`
+--
+
+CREATE TABLE `mpesa_settings` (
+  `id` int(100) NOT NULL AUTO_INCREMENT,
+  `paybill` varchar(50) NOT NULL,
+  `passkey` varchar(255) NOT NULL,
+  `consumer_key` varchar(255) NOT NULL,
+  `consumer_secret` varchar(255) NOT NULL,
+  `callback_url` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `admins`
 --
 
 CREATE TABLE `admins` (
   `id` int(100) NOT NULL,
   `name` varchar(20) NOT NULL,
-  `password` varchar(50) NOT NULL
+  `password` varchar(50) NOT NULL,
+  `is_super_admin` tinyint(1) NOT NULL DEFAULT 0,
+  `can_view_user_data` tinyint(1) NOT NULL DEFAULT 0,
+  `can_upload_user_documents` tinyint(1) NOT NULL DEFAULT 0,
+  `can_register_admins` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `admins`
 --
 
-INSERT INTO `admins` (`id`, `name`, `password`) VALUES
-(1, 'admin', '6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2');
+INSERT INTO `admins` (`id`, `name`, `password`, `is_super_admin`) VALUES
+(1, 'admin', '6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2', 1);
 
 -- --------------------------------------------------------
 
@@ -133,6 +153,24 @@ CREATE TABLE `wishlist` (
   `name` varchar(100) NOT NULL,
   `price` int(100) NOT NULL,
   `image` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_documents`
+--
+
+CREATE TABLE `user_documents` (
+  `id` int(100) NOT NULL AUTO_INCREMENT,
+  `user_id` int(100) NOT NULL,
+  `uploaded_by` int(100) NOT NULL,
+  `original_name` varchar(255) NOT NULL,
+  `mime_type` varchar(100) NOT NULL,
+  `file_data` mediumblob NOT NULL,
+  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --

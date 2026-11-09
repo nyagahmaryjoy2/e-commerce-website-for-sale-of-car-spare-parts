@@ -2,7 +2,7 @@
 
 include 'components/connect.php';
 
-session_start();
+if(session_status() === PHP_SESSION_NONE){ session_start(); }
 
 if(isset($_SESSION['user_id'])){
    $user_id = $_SESSION['user_id'];

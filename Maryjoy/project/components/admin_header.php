@@ -1,4 +1,8 @@
 <?php
+   require_once 'admin_access.php';
+   ensure_admin_access_schema($conn);
+   $header_admin_access = get_admin_access($conn, (int)$admin_id);
+
    if(isset($message)){
       foreach($message as $message){
          echo '
@@ -21,9 +25,32 @@
          <a href="../admin/products.php">Products</a>
          <a href="../admin/placed_orders.php">Orders</a>
          <a href="../admin/mpesa_settings.php">M-Pesa Settings</a>
-         <a href="../admin/admin_accounts.php">Admins</a>
-         <a href="../admin/users_accounts.php">Users</a>
-         <a href="../admin/messages.php">Messages</a>
+         <?php if(!empty($header_admin_access['is_super_admin']) || admin_can_register_admins($header_admin_access)){ ?>
+            <details class="admin-nav-dropdown">
+               <summary>Admin</summary>
+               <div class="admin-nav-menu">
+                  <?php if(!empty($header_admin_access['is_super_admin'])){ ?>
+                     <a href="../admin/admin_accounts.php">Admin Accounts</a>
+                  <?php } ?>
+                  <?php if(admin_can_register_admins($header_admin_access)){ ?>
+                     <a href="../admin/register_admin.php">Admin Creation</a>
+                  <?php } ?>
+                  <?php if(!empty($header_admin_access['is_super_admin'])){ ?>
+                     <a href="../admin/admin_permissions.php">Admin Rights</a>
+                  <?php } ?>
+               </div>
+            </details>
+         <?php } ?>
+         <details class="admin-nav-dropdown">
+            <summary>Users</summary>
+            <div class="admin-nav-menu">
+               <a href="../admin/users_accounts.php">Users</a>
+               <?php if(admin_can_view_user_data($header_admin_access) || admin_can_upload_user_documents($header_admin_access)){ ?>
+                  <a href="../admin/user_data.php">User Data</a>
+               <?php } ?>
+               <a href="../admin/messages.php">Messages</a>
+            </div>
+         </details>
       </nav>
 
       <div class="icons">
@@ -39,14 +66,19 @@
          ?>
          <p><?= $fetch_profile['name']; ?></p>
          <a href="../admin/update_profile.php" class="btn">Update Profile</a>
-         <div class="flex-btn">
-            <a href="../admin/register_admin.php" class="option-btn">Register</a>
-            <a href="../admin/admin_login.php" class="option-btn">Login</a>
-         </div>
-         <a href="../components/admin_logout.php" class="delete-btn" onclick="return confirm('logout from the website?');">logout</a> 
+         <?php if(admin_can_register_admins($header_admin_access)){ ?>
+            <a href="../admin/register_admin.php" class="option-btn">Register New Admin</a>
+         <?php } ?>
+         <a href="../components/admin_logout.php" class="delete-btn" onclick="return confirm('logout from the website?');">Log Out</a>
       </div>
          
 
    </section>
 
 </header>
+
+<button class="admin-menu-backdrop" type="button" aria-label="Close admin menu" hidden></button>
+
+<?php if(!empty($admin_id)){ ?>
+   <script src="../js/session_timeout.js" data-login-url="admin_login.php" data-heartbeat-url="../components/session_heartbeat.php"></script>
+<?php } ?>

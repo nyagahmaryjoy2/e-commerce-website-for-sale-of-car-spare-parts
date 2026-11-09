@@ -3,7 +3,7 @@
 include 'components/connect.php';
 include 'components/config.php';
 
-session_start();
+if(session_status() === PHP_SESSION_NONE){ session_start(); }
 
 if(isset($_SESSION['user_id'])){
    $user_id = $_SESSION['user_id'];
@@ -17,40 +17,35 @@ $fetch_profile = $select_profile->fetch(PDO::FETCH_ASSOC);
 
 if(isset($_POST['submit'])){
 
-   $first_name = $_POST['first_name'];
-   $first_name = filter_var($first_name, FILTER_SANITIZE_STRING);
-   $last_name = $_POST['last_name'];
-   $last_name = filter_var($last_name, FILTER_SANITIZE_STRING);
+   $first_name = trim($_POST['first_name'] ?? '');
+   $first_name = htmlspecialchars($first_name, ENT_QUOTES, 'UTF-8');
+   $last_name = trim($_POST['last_name'] ?? '');
+   $last_name = htmlspecialchars($last_name, ENT_QUOTES, 'UTF-8');
    $name = $first_name . ' ' . $last_name;
-   $email = $_POST['email'];
-   $email = filter_var($email, FILTER_SANITIZE_STRING);
-   $phone = $_POST['phone'];
-   $phone = filter_var($phone, FILTER_SANITIZE_STRING);
-   $address = $_POST['address'];
-   $address = filter_var($address, FILTER_SANITIZE_STRING);
-   $location = $_POST['location'];
-   $location = filter_var($location, FILTER_SANITIZE_STRING);
+   $email = trim($_POST['email'] ?? '');
+   $email = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
+   $phone = trim($_POST['phone'] ?? '');
+   $phone = htmlspecialchars($phone, ENT_QUOTES, 'UTF-8');
+   $address = trim($_POST['address'] ?? '');
+   $address = htmlspecialchars($address, ENT_QUOTES, 'UTF-8');
+   $location = trim($_POST['location'] ?? '');
+   $location = htmlspecialchars($location, ENT_QUOTES, 'UTF-8');
 
    // Validate Kenyan phone number
    if (!preg_match('/^(?:\+254|0)[17]\d{8}$/', $phone)) {
       $message[] = 'Please enter a valid Kenyan phone number (e.g., +254712345678 or 0712345678)';
    } else {
 
-      $location_lat = $_POST['location_lat'];
-      $location_lat = filter_var($location_lat, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-      $location_lng = $_POST['location_lng'];
-      $location_lng = filter_var($location_lng, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+      $location_lat = (float)($_POST['location_lat'] ?? 0);
+      $location_lng = (float)($_POST['location_lng'] ?? 0);
       $update_profile = $conn->prepare("UPDATE `users` SET name = ?, first_name = ?, last_name = ?, email = ?, phone = ?, address = ?, location = ?, location_lat = ?, location_lng = ? WHERE id = ?");
       $update_profile->execute([$name, $first_name, $last_name, $email, $phone, $address, $location, $location_lat, $location_lng, $user_id]);
 
       $empty_pass = 'da39a3ee5e6b4b0d3255bfef95601890afd80709';
       $prev_pass = $_POST['prev_pass'];
       $old_pass = sha1($_POST['old_pass']);
-      $old_pass = filter_var($old_pass, FILTER_SANITIZE_STRING);
       $new_pass = sha1($_POST['new_pass']);
-      $new_pass = filter_var($new_pass, FILTER_SANITIZE_STRING);
       $cpass = sha1($_POST['cpass']);
-      $cpass = filter_var($cpass, FILTER_SANITIZE_STRING);
 
       $password_updated = false;
 

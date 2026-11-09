@@ -1,23 +1,30 @@
 <?php
 
 include '../components/connect.php';
+require_once '../components/admin_access.php';
 
-session_start();
+if(session_status() === PHP_SESSION_NONE){ session_start(); }
 
-$admin_id = $_SESSION['admin_id'];
+$admin_id = (int)($_SESSION['admin_id'] ?? 0);
 
-if(!isset($admin_id)){
+if($admin_id === 0){
    header('location:admin_login.php');
+   exit;
+}
+
+ensure_admin_access_schema($conn);
+$admin_access = get_admin_access($conn, $admin_id);
+if(!admin_can_register_admins($admin_access)){
+   http_response_code(403);
+   exit('Admin registration permission required.');
 }
 
 if(isset($_POST['submit'])){
 
-   $name = $_POST['name'];
-   $name = filter_var($name, FILTER_SANITIZE_STRING);
+   $name = trim($_POST['name']);
+   $name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
    $pass = sha1($_POST['pass']);
-   $pass = filter_var($pass, FILTER_SANITIZE_STRING);
    $cpass = sha1($_POST['cpass']);
-   $cpass = filter_var($cpass, FILTER_SANITIZE_STRING);
 
    $select_admin = $conn->prepare("SELECT * FROM `admins` WHERE name = ?");
    $select_admin->execute([$name]);

@@ -1,23 +1,33 @@
 <?php
 
 include '../components/connect.php';
+require_once '../components/admin_access.php';
 
-session_start();
+if(session_status() === PHP_SESSION_NONE){ session_start(); }
+ensure_admin_access_schema($conn);
+
+if(isset($_GET['timeout']) || ($_SESSION['session_expired_for'] ?? '') === 'admin'){
+   $message[] = 'Your admin session expired after 5 minutes of inactivity. Please log in again.';
+   unset($_SESSION['session_expired_for']);
+}
 
 if(isset($_POST['submit'])){
 
-   $name = $_POST['name'];
-   $name = filter_var($name, FILTER_SANITIZE_STRING);
+   $name = trim($_POST['name']);
+   $name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
    $pass = sha1($_POST['pass']);
-   $pass = filter_var($pass, FILTER_SANITIZE_STRING);
 
    $select_admin = $conn->prepare("SELECT * FROM `admins` WHERE name = ? AND password = ?");
    $select_admin->execute([$name, $pass]);
    $row = $select_admin->fetch(PDO::FETCH_ASSOC);
 
    if($select_admin->rowCount() > 0){
+      session_regenerate_id(true);
       $_SESSION['admin_id'] = $row['id'];
+      $_SESSION['last_activity'] = time();
+      unset($_SESSION['session_expired_for']);
       header('location:dashboard.php');
+      exit;
    }else{
       $message[] = 'incorrect username or password!';
    }

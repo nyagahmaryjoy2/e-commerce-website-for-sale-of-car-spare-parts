@@ -2,7 +2,7 @@
 
 include 'components/connect.php';
 
-session_start();
+if(session_status() === PHP_SESSION_NONE){ session_start(); }
 
 if(isset($_SESSION['user_id'])){
    $user_id = $_SESSION['user_id'];
@@ -17,13 +17,13 @@ $fetch_profile = $select_profile->fetch(PDO::FETCH_ASSOC);
 
 if(isset($_POST['order'])){
 
-   $first_name = $_POST['first_name'];
-   $first_name = filter_var($first_name, FILTER_SANITIZE_STRING);
-   $last_name = $_POST['last_name'];
-   $last_name = filter_var($last_name, FILTER_SANITIZE_STRING);
+   $first_name = trim($_POST['first_name'] ?? '');
+   $first_name = htmlspecialchars($first_name, ENT_QUOTES, 'UTF-8');
+   $last_name = trim($_POST['last_name'] ?? '');
+   $last_name = htmlspecialchars($last_name, ENT_QUOTES, 'UTF-8');
    $name = $first_name . ' ' . $last_name;
    $number = trim($_POST['number']);
-   $number = filter_var($number, FILTER_SANITIZE_STRING);
+   $number = htmlspecialchars($number, ENT_QUOTES, 'UTF-8');
    $email = $fetch_profile['email']; // from profile
    $method = $_POST['method'] ?? 'cash';
    $method = in_array($method, ['mpesa','cash']) ? $method : 'cash';
