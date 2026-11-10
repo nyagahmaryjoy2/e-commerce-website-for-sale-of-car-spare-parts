@@ -35,7 +35,7 @@
          <span class="demo-contact"><i class="fas fa-phone"></i> +254 7XX XXX XXX (demo)</span>
          <a href="mailto:support@speedo.example"><i class="fas fa-envelope"></i> support@speedo.example</a>
          <a href="mailto:sales@speedo.example"><i class="fas fa-envelope"></i> sales@speedo.example</a>
-         <a href="https://www.google.com/myplace"><i class="fas fa-map-marker-alt"></i> Naivasha </a>
+         <a href="https://www.google.com/myplace"><i class="fas fa-map-marker-alt"></i> Naivasha</a>
       </div>
 
    </section>

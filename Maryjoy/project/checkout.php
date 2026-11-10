@@ -135,9 +135,21 @@ if(isset($_POST['order'])){
             <span>Last Name :</span>
             <input type="text" name="last_name" placeholder="enter your last name" class="box" maxlength="20" value="<?= $fetch_profile['last_name']; ?>" required>
          </div>
-         <div class="inputBox">
+         <div class="inputBox" style="flex:1;">
             <span>Your Number :</span>
-            <input type="text" name="number" id="paymentNumber" placeholder="enter your number" class="box" value="<?= $fetch_profile['phone']; ?>" required>
+            <div style="display:flex; gap:0.8rem; align-items:center;">
+               <select id="countryCodeSelect" class="box" style="max-width:180px;">
+                  <option value="+254">🇰🇪 Kenya (+254)</option>
+                  <option value="+256">🇺🇬 Uganda (+256)</option>
+                  <option value="+255">🇹🇿 Tanzania (+255)</option>
+                  <option value="+233">🇬🇭 Ghana (+233)</option>
+                  <option value="+1">🇺🇸 United States (+1)</option>
+                  <option value="+44">🇬🇧 United Kingdom (+44)</option>
+                  <option value="+61">🇦🇺 Australia (+61)</option>
+                  <option value="+27">🇿🇦 South Africa (+27)</option>
+               </select>
+               <input type="text" name="number" id="paymentNumber" placeholder="enter your number" class="box" value="<?= htmlspecialchars((string)($fetch_profile['phone'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" required style="flex:1;">
+            </div>
          </div>
       </div>
 
@@ -179,11 +191,43 @@ if(isset($_POST['order'])){
 <script>
 const paymentMethod = document.getElementById('paymentMethod');
 const paymentNumber = document.getElementById('paymentNumber');
-const profilePhone = '<?= addslashes($fetch_profile['phone']); ?>';
+const countryCodeSelect = document.getElementById('countryCodeSelect');
+const profilePhone = '<?= addslashes((string)($fetch_profile['phone'] ?? '')); ?>';
+
+function normalizePhone(value, code) {
+   const digits = (value || '').replace(/\D/g, '');
+   if (!digits) return code;
+   if (value.startsWith('+')) {
+      return code + digits;
+   }
+   if (value.startsWith('0')) {
+      return code + digits.substring(1);
+   }
+   return code + digits;
+}
+
+function syncPhoneFormatting() {
+   const value = paymentNumber.value || '';
+   const code = countryCodeSelect.value;
+   if (!value) {
+      paymentNumber.value = code;
+      return;
+   }
+
+   const matchedCode = Array.from(countryCodeSelect.options).find(option => value.startsWith(option.value));
+   if (matchedCode) {
+      countryCodeSelect.value = matchedCode.value;
+      const digits = value.replace(/\D/g, '');
+      paymentNumber.value = matchedCode.value + digits.substring(matchedCode.value.replace(/\D/g, '').length);
+      return;
+   }
+
+   paymentNumber.value = normalizePhone(value, code);
+}
 
 function updatePaymentNumber() {
    if(paymentMethod.value === 'mpesa'){
-      paymentNumber.value = profilePhone;
+      paymentNumber.value = profilePhone || countryCodeSelect.value;
       paymentNumber.readOnly = true;
       paymentNumber.placeholder = profilePhone ? '' : 'Please add your phone in profile';
       paymentNumber.style.backgroundColor = '#f0f0f0';
@@ -191,7 +235,30 @@ function updatePaymentNumber() {
       paymentNumber.readOnly = false;
       paymentNumber.placeholder = 'enter your number';
       paymentNumber.style.backgroundColor = '';
+      if (!paymentNumber.value) {
+         paymentNumber.value = countryCodeSelect.value;
+      }
    }
+}
+
+countryCodeSelect.addEventListener('change', function() {
+   syncPhoneFormatting();
+});
+
+paymentNumber.addEventListener('input', function() {
+   const selectedCode = countryCodeSelect.value;
+   const value = paymentNumber.value || '';
+   if (!value) {
+      paymentNumber.value = selectedCode;
+      return;
+   }
+   paymentNumber.value = normalizePhone(value, selectedCode);
+});
+
+const matchedProfileCode = Array.from(countryCodeSelect.options).find(option => (profilePhone || '').startsWith(option.value));
+if (matchedProfileCode) {
+   countryCodeSelect.value = matchedProfileCode.value;
+   paymentNumber.value = normalizePhone(profilePhone, matchedProfileCode.value);
 }
 
 paymentMethod.addEventListener('change', updatePaymentNumber);
