@@ -1,8 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600;700&display=swap');
 
 :root{
-   --main-color:blue;/*for order button*/
+   --main-color:#7272f7;/*for order button*/
    --orange:#f39c12;
+   --sec-color :#93e5a2;
    --red:#e74c3c;
    --black:#333;
    --white:#fff;/*sliider content colour*/
@@ -79,7 +80,7 @@ section{
 .btn:hover,
 .delete-btn:hover,
 .option-btn:hover{
-   background-color: var(--orange);
+   background-color: var(--sec-color);
 }
 
 .btn{
@@ -155,9 +156,12 @@ section{
 .header{
    position: sticky;
    top:0; left:0; right:0;
-   background-color: var(--white);
-   box-shadow: var(--box-shadow);
+   background: rgba(16, 31, 22, 0.55);
+   backdrop-filter: blur(12px);
+   -webkit-backdrop-filter: blur(12px);
+   box-shadow: 0 .8rem 2rem rgba(7, 16, 11, 0.16);
    z-index: 1000;
+   border-bottom: 1px solid rgba(255,255,255,.14);
 }
 
 .header .flex{
@@ -165,42 +169,65 @@ section{
    align-items: center;
    justify-content: space-between;
    position: relative;
+   min-height: 7.5rem;
 }
 
 .header .flex .logo{
-   font-size: 2.5rem;
-   color:var(--black);
+   font-size: 2.8rem;
+   color:var(--white);
+   font-weight: 900;
+   letter-spacing: .04em;
 }
 
 .header .flex .logo span{
    color:var(--main-color);
 }
 
+.header .flex .navbar {
+   display:flex;
+   align-items:center;
+   gap:1.5rem;
+   flex-wrap: wrap;
+}
+
 .header .flex .navbar a{
-   margin:0 1rem;
-   font-size: 2rem;
-   color:var(--black);
+   margin:0;
+   font-size: 1.7rem;
+   color:rgba(255,255,255,.9);
+   font-weight: 700;
 }
 
 .header .flex .navbar a:hover{
    color:var(--main-color);
    text-decoration: underline;
+   text-decoration-thickness: 2px;
+   text-underline-offset: 4px;
 }
 
+.header .flex .icons {
+   display:flex;
+   align-items:center;
+   gap:.8rem;
+   flex-wrap: wrap;
+}
 
 .header .flex .icons > *{
-   margin-left: 1rem;
-   font-size: 2.5rem;
+   margin-left: 0;
+   font-size: 1.7rem;
    cursor: pointer;
-   color:var(--black);
+   color:var(--white);
+   padding: .75rem 1rem;
+   border-radius: 999px;
+   transition: all .2s ease;
 }
 
 .header .flex .icons > *:hover{
    color:var(--main-color);
+   background: rgba(255,255,255,.08);
 }
 
 .header .flex .icons a span{
-   font-size: 2rem;
+   font-size: 1.5rem;
 }
 
 .header .flex .profile{
@@ -230,15 +257,61 @@ section{
 
 #menu-btn{
    display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.75rem;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  header nav {
+    display: none;                      /* hidden until toggled */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 0;
+    background: rgba(255, 255, 255, 0.6);   /* translucent so the blur shows */
+    -webkit-backdrop-filter: blur(14px);    /* Safari */
+    backdrop-filter: blur(14px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  header nav.open {
+    display: flex;
+  }
+
+  header nav a {
+    color: #000;                        /* black text in dropdown */
+    padding: 1rem 2rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  header nav a:hover {
+    color: #000;                        /* stays black on hover */
+    text-decoration-color: #ff6600;     /* underline color */
+  }
 }
 
 .home-bg {
+   background: url("../images/background-cars.jpg") no-repeat;
+   background-size: 100% 100%;
+   background-position: top;
+   background-attachment: fixed;
+}
+/*.home-bg {
    background: linear-gradient(to bottom, #333, #666);
    background-size: 100% 100%;
    background-position: top;
    background-repeat: no-repeat;
- }
-
+ }*/
+ 
  .home-bg .home .slide {
    display: grid;
    grid-template-columns: 1fr 1fr;
@@ -246,6 +319,8 @@ section{
    padding-bottom: 6rem;
    padding-top: 2rem;
    user-select: none;
+   position: relative;
+   z-index: 1;
  }
  
  .home-bg .home .slide .image {
@@ -258,11 +333,15 @@ section{
    width: 100%;
    object-fit: cover;
    border-radius: 1rem;
+   box-shadow: 0 2rem 4rem rgba(0,0,0,.25);
+   border: .8rem solid rgba(255,255,255,.08);
  }
  
  .home-bg .home .slide .content {
    grid-column: 2;
    max-width: 40rem;
+   position: relative;
+   z-index: 1;
  }
  
  .home-bg .home .slide .content span {
@@ -275,6 +354,7 @@ section{
    font-size: 4rem;
    color:var(--white);
    text-transform: uppercase;
+   text-shadow: 0 .4rem 1rem rgba(0,0,0,.35);
 }
 
 .home-bg .home .slide .content .btn{
@@ -980,7 +1060,7 @@ section{
 
 .footer{
    margin-top:4rem;
-   border-top:.4rem solid var(--orange);
+   border-top:.4rem solid var(--main-color);
    background-color:#171d20;
 }
 
@@ -1008,7 +1088,7 @@ section{
 
 .footer-logo i,
 .footer-logo strong{
-   color:var(--orange);
+   color:var(--main-color);
 }
 
 .footer-logo strong{
@@ -1041,8 +1121,8 @@ section{
 }
 
 .footer-socials a:hover{
-   border-color:var(--orange);
-   background-color:var(--orange);
+   border-color:var(--main-color);
+   background-color:var(--main-color);
    color:#171d20;
 }
 
@@ -1070,12 +1150,12 @@ section{
 
 .footer .grid .box a i{
    width:2.2rem;
-   color:var(--orange);
+   color:var(--main-color);
 }
 
 .footer .grid .box .demo-contact i{
    width:2.2rem;
-   color:var(--orange);
+   color:var(--main-color);
 }
 
 .footer .grid .box a:hover{
